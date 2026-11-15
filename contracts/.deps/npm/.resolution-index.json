@@ -1,0 +1,10 @@
+{
+  "UrbanMove.sol": {
+    "__sources__": {
+      "UrbanMove.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\n\ncontract UrbanMove {\n    address payable public driver;\n    address public passenger;\n\n    // Test fare only\n    uint256 public constant FARE = 0.01 ether;\n\n    enum BookingStatus {\n        Available,\n        Booked,\n        JourneyCompleted,\n        Paid\n    }\n\n    BookingStatus public status;\n\n    constructor() {\n        driver = payable(msg.sender);\n        status = BookingStatus.Available;\n    }\n}\n",
+        "file": "UrbanMove.sol"
+      }
+    }
+  }
+}
