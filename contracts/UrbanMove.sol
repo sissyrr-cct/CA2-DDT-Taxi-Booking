@@ -15,6 +15,7 @@ contract UrbanMove {
     }
 
      event TaxiBooked(address passenger, uint256 fare);
+     event JourneyCompleted(address driver, address passenger);
 
     BookingStatus public status;
 
@@ -23,7 +24,6 @@ contract UrbanMove {
         status = BookingStatus.Available;
     }
 
-     // passenger books and pays the fare
     function bookTaxi() public payable {
         require(
             status == BookingStatus.Available,
@@ -45,4 +45,21 @@ contract UrbanMove {
 
         emit TaxiBooked(passenger, msg.value);
     }
+
+    function completeJourney() public {
+        require(
+            msg.sender == driver,
+            "Driver only"
+        );
+
+        require(
+            status == BookingStatus.Booked,
+            "Journey is not booked"
+        );
+
+        status = BookingStatus.JourneyCompleted;
+
+        emit JourneyCompleted(driver, passenger);
+    }
+
 }
