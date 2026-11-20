@@ -14,8 +14,9 @@ contract UrbanMove {
         Paid
     }
 
-     event TaxiBooked(address passenger, uint256 fare);
-     event JourneyCompleted(address driver, address passenger);
+    event TaxiBooked(address passenger, uint256 fare);
+    event JourneyCompleted(address driver, address passenger);
+    event PaymentReleased(address passenger, address driver, uint256 amount);
 
     BookingStatus public status;
 
@@ -25,20 +26,11 @@ contract UrbanMove {
     }
 
     function bookTaxi() public payable {
-        require(
-            status == BookingStatus.Available,
-            "Taxi already booked"
-        );
+        require(status == BookingStatus.Available, "Taxi already booked");
 
-        require(
-            msg.sender != driver,
-            "Driver cannot book taxi"
-        );
+        require(msg.sender != driver, "Driver cannot book taxi");
 
-        require(
-            msg.value == FARE,
-            "Incorrect fare amount"
-        );
+        require(msg.value == FARE, "Incorrect fare amount");
 
         passenger = msg.sender;
         status = BookingStatus.Booked;
@@ -47,19 +39,34 @@ contract UrbanMove {
     }
 
     function completeJourney() public {
-        require(
-            msg.sender == driver,
-            "Driver only"
-        );
+        require(msg.sender == driver, "Driver only");
 
-        require(
-            status == BookingStatus.Booked,
-            "Journey is not booked"
-        );
+        require(status == BookingStatus.Booked, "Journey is not booked");
 
         status = BookingStatus.JourneyCompleted;
 
         emit JourneyCompleted(driver, passenger);
+    }
+
+    function confirmAndPay() public {
+        require(
+            msg.sender == passenger,
+            "Only passenger can confirm payment"
+        );
+
+        require(
+            status == BookingStatus.JourneyCompleted,
+            "Journey not completed"
+        );
+
+        uint256 amount = FARE;
+
+        status = BookingStatus.Paid;
+
+        (bool success, ) = driver.call{value: amount}("");
+        require(success, "Payment failed");
+
+        emit PaymentReleased(passenger, driver, amount);
     }
 
 }
